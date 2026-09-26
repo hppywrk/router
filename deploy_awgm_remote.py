@@ -10,6 +10,8 @@ import paramiko
 # Pinned awg-manager commit for scripts/install.sh (override with --installer-ref).
 DEFAULT_INSTALLER_REF = "8fb8e36cac4a6758df96c997f3aea6953bd896de"
 INSTALLER_REPO = "hoaxisr/awg-manager"
+REMOTE_DEPLOY_SCRIPT = os.path.join(os.path.dirname(os.path.abspath(__file__)), "remote_deploy.sh")
+INSTALLER_URL_PLACEHOLDER = "__INSTALLER_URL__"
 
 
 def installer_url(ref: str) -> str:
@@ -17,20 +19,19 @@ def installer_url(ref: str) -> str:
 
 
 def build_remote_command(installer_ref: str) -> str:
-    url = installer_url(installer_ref)
-    return (
-        "set -e\n"
-        "echo '[1/4] Checking Entware (opkg)...'\n"
-        "if ! command -v opkg >/dev/null 2>&1; then echo '[ERROR] opkg not found!'; exit 1; fi\n"
-        "echo '[2/4] Updating package manager...'\n"
-        "opkg update\n"
-        "echo '[3/4] Downloading AWG Manager installer...'\n"
-        'INSTALLER_TMP="$(mktemp)"\n'
-        'trap \'rm -f "$INSTALLER_TMP"\' EXIT\n'
-        f"curl -fsSL -o \"$INSTALLER_TMP\" '{url}'\n"
-        "echo '[4/4] Running AWG Manager installer...'\n"
-        'sh "$INSTALLER_TMP"\n'
-    )
+    try:
+        with open(REMOTE_DEPLOY_SCRIPT, encoding="utf-8") as script_file:
+            template = script_file.read()
+    except OSError as e:
+        print(f"[ERROR] Cannot read remote deploy script at {REMOTE_DEPLOY_SCRIPT}: {e}", file=sys.stderr)
+        sys.exit(1)
+    if INSTALLER_URL_PLACEHOLDER not in template:
+        print(
+            f"[ERROR] Remote deploy script missing placeholder {INSTALLER_URL_PLACEHOLDER!r}.",
+            file=sys.stderr,
+        )
+        sys.exit(1)
+    return template.replace(INSTALLER_URL_PLACEHOLDER, installer_url(installer_ref))
 
 
 def configure_ssh_client(accept_unknown_host_keys: bool, known_hosts: str | None) -> paramiko.SSHClient:
