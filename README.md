@@ -1,5 +1,5 @@
 # router
-VPN on router
+VPN on router. See https://awgm.hoaxisr.ru/install/
 
 ## prerequisites
 pip install paramiko
