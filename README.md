@@ -1,9 +1,8 @@
 # router
-VPN on router. See https://awgm.hoaxisr.ru/install/
 
-This repo runs the [AWG Manager](https://github.com/hoaxisr/awg-manager) installer on a Keenetic router over SSH (Entware `opkg` required).
+Set up VPN on a Keenetic router with [AWG Manager](https://awgm.hoaxisr.ru/install/). This repository includes a deploy script that installs [AWG Manager](https://github.com/hoaxisr/awg-manager) over SSH (Entware `opkg` required).
 
-## prerequisites
+## Prerequisites
 
 - Router with Entware and network access to GitHub
 - Python 3 on the machine you run the deploy script from
@@ -18,7 +17,7 @@ Treat router passwords and key files as secrets. Prefer SSH keys over passwords;
 
 By default the script uses your system `known_hosts` and **rejects** unknown router keys. On first connect, either add the router key to `known_hosts`, or pass `--accept-unknown-host-keys` once (less secure).
 
-## option 1. passing creds via env
+## Option 1: credentials via environment
 
 ```bash
 export ROUTER_HOST="192.168.1.1"
@@ -36,13 +35,13 @@ export ROUTER_KEY_FILE="$HOME/.ssh/id_ed25519"
 python3 deploy_awgm_remote.py
 ```
 
-## option 2. passing creds via CLI
+## Option 2: credentials via CLI
 
 ```bash
 python3 deploy_awgm_remote.py --host 192.168.1.1 --user root --password YourRouterPassword --port 22
 ```
 
-## installer pin
+## Installer pin
 
 The deploy script downloads `scripts/install.sh` from `hoaxisr/awg-manager` at a **pinned commit** (see `DEFAULT_INSTALLER_REF` in `deploy_awgm_remote.py`). To use another tag, branch, or commit:
 
@@ -53,7 +52,7 @@ python3 deploy_awgm_remote.py
 
 Using `develop` or a moving branch runs whatever the upstream publishes at deploy time (higher trust requirement).
 
-## options
+## Options
 
 | Flag / env | Purpose |
 |------------|---------|
